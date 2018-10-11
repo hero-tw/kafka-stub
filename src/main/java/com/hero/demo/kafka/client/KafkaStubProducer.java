@@ -7,6 +7,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -32,16 +34,22 @@ public class KafkaStubProducer {
         producerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        KafkaProducer<String, String> producer = new KafkaProducer(producerProps);
+        KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
 
-        try {
-            RecordMetadata recordMetadata = producer.send(new ProducerRecord<String, String>(TOPICS, "1000", "2000")).get();
+        Timer timer = new Timer();
+        timer.schedule(wrap(() -> {
+            RecordMetadata recordMetadata = null;
+            try {
+                recordMetadata =
+                        producer.send(new ProducerRecord<>(TOPICS, "1000", LocalTime.now().toString())).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             System.out.println(recordMetadata);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        }), 500, 500);
+
         return this;
     }
 
