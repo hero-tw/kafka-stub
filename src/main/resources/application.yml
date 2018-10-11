@@ -1,0 +1,4 @@
+---
+kafkastub:
+  ports: 9092
+  topics: mytopic.t
